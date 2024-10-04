@@ -59,7 +59,7 @@ nfpms:
     priority: optional
     vendor: headscale
     maintainer: Kristoffer Dalby <kristoffer@dalby.cc>
-    homepage: https://github.com/juanfont/headscale
+    homepage: https://github.com/hopleus/headscale
     license: BSD
     bindir: /usr/bin
     formats:
@@ -82,7 +82,7 @@ nfpms:
 
 kos:
   - id: ghcr
-    repository: ghcr.io/juanfont/headscale
+    repository: ghcr.io/hopleus/headscale
 
     # bare tells KO to only use the repository
     # for tagging and naming the container.
@@ -113,7 +113,7 @@ kos:
   - id: dockerhub
     build: headscale
     base_image: gcr.io/distroless/base-debian12
-    repository: headscale/headscale
+    repository: hopleus/headscale
     bare: true
     platforms:
       - linux/amd64
@@ -134,7 +134,7 @@ kos:
       - "sha-{{ .ShortCommit }}"
 
   - id: ghcr-debug
-    repository: ghcr.io/juanfont/headscale
+    repository: ghcr.io/hopleus/headscale
     bare: true
     base_image: gcr.io/distroless/base-debian12:debug
     build: headscale
@@ -162,7 +162,7 @@ kos:
   - id: dockerhub-debug
     build: headscale
     base_image: gcr.io/distroless/base-debian12:debug
-    repository: headscale/headscale
+    repository: hopleus/headscale
     bare: true
     platforms:
       - linux/amd64
