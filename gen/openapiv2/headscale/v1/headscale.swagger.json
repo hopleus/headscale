@@ -1301,6 +1301,37 @@
         },
         "online": {
           "type": "boolean"
+        },
+        "hostInfo": {
+          "$ref": "#/definitions/v1NodeHostInfo"
+        }
+      }
+    },
+    "v1NodeHostInfo": {
+      "type": "object",
+      "properties": {
+        "IPNVersion": {
+          "type": "string"
+        },
+        "OS": {
+          "type": "string"
+        },
+        "OSVersion": {
+          "type": "string"
+        },
+        "DeviceModel": {
+          "type": "string"
+        },
+        "DeviceArch": {
+          "type": "string",
+          "title": "\"Machine\" from tailcfg.Hostinfo"
+        },
+        "DeviceHostname": {
+          "type": "string",
+          "title": "\"Hostname\" from tailcfg.Hostinfo"
+        },
+        "Package": {
+          "type": "string"
         }
       }
     },

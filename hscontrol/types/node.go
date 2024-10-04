@@ -250,6 +250,20 @@ func (node *Node) Proto() *v1.Node {
 		nodeProto.Expiry = timestamppb.New(*node.Expiry)
 	}
 
+	if node.Hostinfo != nil {
+		hostInfo := &v1.NodeHostInfo{
+			IPNVersion:     node.Hostinfo.IPNVersion,
+			OS:             node.Hostinfo.OS,
+			OSVersion:      node.Hostinfo.OSVersion,
+			DeviceModel:    node.Hostinfo.DeviceModel,
+			DeviceArch:     node.Hostinfo.Machine,
+			DeviceHostname: node.Hostinfo.Hostname,
+			Package:        node.Hostinfo.Package,
+		}
+
+		nodeProto.HostInfo = hostInfo
+	}
+
 	return nodeProto
 }
 
