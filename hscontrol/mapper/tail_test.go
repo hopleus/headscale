@@ -44,6 +44,7 @@ func TestTailNode(t *testing.T) {
 	created := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 	lastSeen := time.Date(2009, time.November, 10, 23, 9, 0, 0, time.UTC)
 	expire := time.Date(2500, time.November, 11, 23, 0, 0, 0, time.UTC)
+	authorize := time.Date(2009, time.November, 10, 23, 9, 0, 0, time.UTC)
 
 	tests := []struct {
 		name       string
@@ -72,7 +73,7 @@ func TestTailNode(t *testing.T) {
 				Hostinfo:          hiview(tailcfg.Hostinfo{}),
 				Tags:              []string{},
 				PrimaryRoutes:     []netip.Prefix{},
-				MachineAuthorized: true,
+				MachineAuthorized: false,
 
 				CapMap: tailcfg.NodeCapMap{
 					tailcfg.CapabilityFileSharing: []tailcfg.RawMessage{},
@@ -106,6 +107,7 @@ func TestTailNode(t *testing.T) {
 				AuthKey:    &types.PreAuthKey{},
 				LastSeen:   &lastSeen,
 				Expiry:     &expire,
+				Authorize:  &authorize,
 				Hostinfo:   &tailcfg.Hostinfo{},
 				Routes: []types.Route{
 					{
