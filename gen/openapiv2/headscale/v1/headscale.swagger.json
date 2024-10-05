@@ -1302,6 +1302,12 @@
         "online": {
           "type": "boolean"
         },
+        "allowedExitNode": {
+          "type": "boolean"
+        },
+        "hasExitNode": {
+          "type": "boolean"
+        },
         "hostInfo": {
           "$ref": "#/definitions/v1NodeHostInfo"
         }
@@ -1310,21 +1316,20 @@
     "v1NodeHostInfo": {
       "type": "object",
       "properties": {
-        "IPNVersion": {
+        "tsVersion": {
           "type": "string"
         },
-        "OS": {
+        "osName": {
           "type": "string"
         },
-        "OSVersion": {
+        "osVersion": {
           "type": "string"
         },
-        "DeviceModel": {
+        "deviceModel": {
           "type": "string"
         },
-        "DeviceArch": {
-          "type": "string",
-          "title": "\"Machine\" from tailcfg.Hostinfo"
+        "deviceArch": {
+          "type": "string"
         }
       }
     },

@@ -23,7 +23,15 @@
 ## [FORK] 0.23.0-1 (2024-10-04)
 ### Changes
 
-- Add HostInfo to Node response
+- Modified Node response
+  - allowedExitNode
+  - hasExitNode
+  - hostInfo
+    - tsVersion
+    - osName
+    - osVersion
+    - deviceModel
+    - deviceArch
 - Added the ability to configure endpoints availability (Platform Configs and Swagger)
 
 ## 0.23.0 (2024-09-18)

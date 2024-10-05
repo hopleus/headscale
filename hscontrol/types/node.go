@@ -250,11 +250,21 @@ func (node *Node) Proto() *v1.Node {
 		nodeProto.Expiry = timestamppb.New(*node.Expiry)
 	}
 
+	if node.Routes != nil {
+		for _, route := range node.Routes {
+			if route.IsExitRoute() {
+				nodeProto.HasExitNode = route.Advertised
+				nodeProto.AllowedExitNode = route.IsAnnouncable()
+				break
+			}
+		}
+	}
+
 	if node.Hostinfo != nil {
 		hostInfo := &v1.NodeHostInfo{
-			IPNVersion:  node.Hostinfo.IPNVersion,
-			OS:          node.Hostinfo.OS,
-			OSVersion:   node.Hostinfo.OSVersion,
+			TsVersion:   node.Hostinfo.IPNVersion,
+			OsName:      node.Hostinfo.OS,
+			OsVersion:   node.Hostinfo.OSVersion,
 			DeviceModel: node.Hostinfo.DeviceModel,
 			DeviceArch:  node.Hostinfo.Machine,
 		}
