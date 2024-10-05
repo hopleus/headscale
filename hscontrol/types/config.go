@@ -86,6 +86,8 @@ type Config struct {
 	Policy PolicyConfig
 
 	Tuning Tuning
+
+	Routes RoutesConfig
 }
 
 type DNSConfig struct {
@@ -203,6 +205,11 @@ type LogConfig struct {
 	Level  zerolog.Level
 }
 
+type RoutesConfig struct {
+	PlatformConfig bool
+	Swagger        bool
+}
+
 type Tuning struct {
 	NotifierSendTimeout            time.Duration
 	BatchChangeDelay               time.Duration
@@ -283,6 +290,9 @@ func LoadConfig(path string, isFile bool) error {
 	viper.SetDefault("tuning.notifier_send_timeout", "800ms")
 	viper.SetDefault("tuning.batch_change_delay", "800ms")
 	viper.SetDefault("tuning.node_mapsession_buffered_chan_size", 30)
+
+	viper.SetDefault("routes.platformConfig", true)
+	viper.SetDefault("routes.swagger", true)
 
 	viper.SetDefault("prefixes.allocation", string(IPAllocationStrategySequential))
 
@@ -919,6 +929,11 @@ func LoadServerConfig() (*Config, error) {
 			NodeMapSessionBufferedChanSize: viper.GetInt(
 				"tuning.node_mapsession_buffered_chan_size",
 			),
+		},
+
+		Routes: RoutesConfig{
+			PlatformConfig: viper.GetBool("routes.platformConfig"),
+			Swagger:        viper.GetBool("routes.swagger"),
 		},
 	}, nil
 }

@@ -384,3 +384,10 @@ logtail:
 # default static port 41641. This option is intended as a workaround for some buggy
 # firewall devices. See https://tailscale.com/kb/1181/firewalls/ for more information.
 randomize_client_port: false
+
+# Configuration routes
+routes:
+  # Disabling routes to download configuration for windows and apple
+  platformConfig: false
+  # Disabling routes for Swagger
+  swagger: false
