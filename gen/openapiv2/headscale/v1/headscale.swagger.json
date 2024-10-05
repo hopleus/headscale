@@ -1325,13 +1325,6 @@
         "DeviceArch": {
           "type": "string",
           "title": "\"Machine\" from tailcfg.Hostinfo"
-        },
-        "DeviceHostname": {
-          "type": "string",
-          "title": "\"Hostname\" from tailcfg.Hostinfo"
-        },
-        "Package": {
-          "type": "string"
         }
       }
     },

@@ -57,8 +57,6 @@ message NodeHostInfo {
     string OSVersion = 3;
     string DeviceModel = 4;
     string DeviceArch = 5; // "Machine" from tailcfg.Hostinfo
-    string DeviceHostname = 6; // "Hostname" from tailcfg.Hostinfo
-    string Package = 7;
 }
 
 message RegisterNodeRequest {
