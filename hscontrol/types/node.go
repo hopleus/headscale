@@ -81,8 +81,9 @@ type Node struct {
 	AuthKeyID *uint64     `sql:"DEFAULT:NULL"`
 	AuthKey   *PreAuthKey `gorm:"constraint:OnDelete:SET NULL;"`
 
-	LastSeen *time.Time
-	Expiry   *time.Time
+	LastSeen  *time.Time
+	Expiry    *time.Time
+	Authorize *time.Time
 
 	Routes []Route `gorm:"constraint:OnDelete:CASCADE;"`
 
@@ -107,6 +108,11 @@ func (node Node) IsExpired() bool {
 	}
 
 	return time.Since(*node.Expiry) > 0
+}
+
+// IsAuthorized returns whether the node is authorized.
+func (node Node) IsAuthorized() bool {
+	return node.Authorize != nil && node.Authorize.IsZero() == false
 }
 
 // IsEphemeral returns if the node is registered as an Ephemeral node.
@@ -174,6 +180,11 @@ func (node *Node) AppendToIPSet(build *netipx.IPSetBuilder) {
 func (node *Node) CanAccess(filter []tailcfg.FilterRule, node2 *Node) bool {
 	src := node.IPs()
 	allowedIPs := node2.IPs()
+
+	// Check approve nodes
+	if node.IsAuthorized() == false || node2.IsAuthorized() == false {
+		return false
+	}
 
 	// TODO(kradalby): Regenerate this everytime the filter change, instead of
 	// every time we use it.
@@ -248,6 +259,10 @@ func (node *Node) Proto() *v1.Node {
 
 	if node.Expiry != nil {
 		nodeProto.Expiry = timestamppb.New(*node.Expiry)
+	}
+
+	if node.Authorize != nil {
+		nodeProto.Authorized = timestamppb.New(*node.Authorize)
 	}
 
 	return nodeProto

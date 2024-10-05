@@ -109,6 +109,13 @@ func (h *Headscale) handleRegister(
 
 		logInfo("Node not found in database, creating new")
 
+		nodeExpiry := time.Time{}
+		var maxDurationNodeExpiry time.Duration = 1<<63 - 1
+
+		if h.cfg.NodeManagement.KeyExpiry != maxDurationNodeExpiry {
+			nodeExpiry = time.Now().Add(h.cfg.NodeManagement.KeyExpiry)
+		}
+
 		// The node did not have a key to authenticate, which means
 		// that we rely on a method that calls back some how (OpenID or CLI)
 		// We create the node and then keep it around until a callback
@@ -118,12 +125,16 @@ func (h *Headscale) handleRegister(
 			Hostname:   regReq.Hostinfo.Hostname,
 			NodeKey:    regReq.NodeKey,
 			LastSeen:   &now,
-			Expiry:     &time.Time{},
+			Expiry:     &nodeExpiry,
 		}
 
 		if !regReq.Expiry.IsZero() {
 			logTrace("Non-zero expiry time requested")
 			newNode.Expiry = &regReq.Expiry
+		}
+
+		if h.cfg.NodeManagement.ManualApproveNewNode == false {
+			newNode.Authorize = &now
 		}
 
 		h.registrationCache.Set(
@@ -342,6 +353,11 @@ func (h *Headscale) handleAuthKey(
 		h.nodeNotifier.NotifyAll(ctx, types.StateUpdate{Type: types.StatePeerChanged, ChangeNodes: []types.NodeID{node.ID}})
 	} else {
 		now := time.Now().UTC()
+		var authorize *time.Time
+
+		if pak.Preauthorized {
+			authorize = &now
+		}
 
 		nodeToRegister := types.Node{
 			Hostname:       registerRequest.Hostinfo.Hostname,
@@ -353,6 +369,7 @@ func (h *Headscale) handleAuthKey(
 			NodeKey:        nodeKey,
 			LastSeen:       &now,
 			ForcedTags:     pak.Proto().GetAclTags(),
+			Authorize:      authorize,
 		}
 
 		ipv4, ipv6, err := h.ipAlloc.Next()
@@ -399,7 +416,7 @@ func (h *Headscale) handleAuthKey(
 		return
 	}
 
-	resp.MachineAuthorized = true
+	resp.MachineAuthorized = node.IsAuthorized()
 	resp.User = *pak.User.TailscaleUser()
 	// Provide LoginName when registering with pre-auth key
 	// Otherwise it will need to exec `tailscale up` twice to fetch the *LoginName*
@@ -559,10 +576,11 @@ func (h *Headscale) handleNodeWithValidRegistration(
 	log.Debug().
 		Caller().
 		Str("node", node.Hostname).
+		Bool("isAuthorized", node.IsAuthorized()).
 		Msg("Client is registered and we have the current NodeKey. All clear to /map")
 
 	resp.AuthURL = ""
-	resp.MachineAuthorized = true
+	resp.MachineAuthorized = node.IsAuthorized()
 	resp.User = *node.User.TailscaleUser()
 	resp.Login = *node.User.TailscaleLogin()
 
@@ -590,7 +608,7 @@ func (h *Headscale) handleNodeWithValidRegistration(
 	log.Info().
 		Caller().
 		Str("node", node.Hostname).
-		Msg("Node successfully authorized")
+		Msg("Node successfully authorized or waiting authorized")
 }
 
 func (h *Headscale) handleNodeKeyRefresh(

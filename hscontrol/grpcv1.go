@@ -136,6 +136,7 @@ func (api headscaleV1APIServer) CreatePreAuthKey(
 		request.GetReusable(),
 		request.GetEphemeral(),
 		&expiration,
+		request.GetPreauthorized(),
 		request.AclTags,
 	)
 	if err != nil {
@@ -210,10 +211,17 @@ func (api headscaleV1APIServer) RegisterNode(
 		return nil, fmt.Errorf("looking up user: %w", err)
 	}
 
+	nodeExpiry := time.Time{}
+	var maxDurationNodeExpiry time.Duration = 1<<63 - 1
+
+	if api.h.cfg.NodeManagement.KeyExpiry != maxDurationNodeExpiry {
+		nodeExpiry = time.Now().Add(api.h.cfg.NodeManagement.KeyExpiry)
+	}
+
 	node, err := api.h.db.RegisterNodeFromAuthCallback(
 		mkey,
 		types.UserID(user.ID),
-		nil,
+		&nodeExpiry,
 		util.RegisterMethodCLI,
 		ipv4, ipv6,
 	)
@@ -326,6 +334,42 @@ func (api headscaleV1APIServer) DeleteNode(
 	}
 
 	return &v1.DeleteNodeResponse{}, nil
+}
+
+func (api headscaleV1APIServer) ApproveNode(
+	ctx context.Context,
+	request *v1.ApproveNodeRequest,
+) (*v1.ApproveNodeResponse, error) {
+	now := time.Now()
+
+	node, err := db.Write(api.h.db.DB, func(tx *gorm.DB) (*types.Node, error) {
+		db.NodeSetAuthorize(
+			tx,
+			types.NodeID(request.GetNodeId()),
+			now,
+		)
+
+		return db.GetNodeByID(tx, types.NodeID(request.GetNodeId()))
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = types.NotifyCtx(ctx, "cli-authorizednode-self", node.Hostname)
+	api.h.nodeNotifier.NotifyByNodeID(
+		ctx,
+		types.StateUpdate{
+			Type:        types.StateSelfUpdate,
+			ChangeNodes: []types.NodeID{node.ID},
+		},
+		node.ID)
+
+	log.Trace().
+		Str("node", node.Hostname).
+		Time("authorize", *node.Authorize).
+		Msg("node authorized")
+
+	return &v1.ApproveNodeResponse{Node: node.Proto()}, nil
 }
 
 func (api headscaleV1APIServer) ExpireNode(

@@ -384,3 +384,12 @@ logtail:
 # default static port 41641. This option is intended as a workaround for some buggy
 # firewall devices. See https://tailscale.com/kb/1181/firewalls/ for more information.
 randomize_client_port: false
+
+## NodeManagement
+node_management:
+  # Require new nodes to be approved by admins before they can access the network.
+  manual_approve_new_node: false
+
+  # The amount of time from a node can stay logged in to HeadScale before it needs to re-authenticate.
+  # Setting the value to "0" will mean no expiry.
+  key_expiry: 0

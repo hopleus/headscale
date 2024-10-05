@@ -43,11 +43,12 @@ message Node {
     // bytes endpoints      = 16;
     // bytes enabled_routes = 17;
 
-    repeated string forced_tags  = 18;
-    repeated string invalid_tags = 19;
-    repeated string valid_tags   = 20;
-    string          given_name   = 21;
-    bool            online       = 22;
+    repeated string           forced_tags  = 18;
+    repeated string           invalid_tags = 19;
+    repeated string           valid_tags   = 20;
+    string                    given_name   = 21;
+    bool                      online       = 22;
+    google.protobuf.Timestamp authorized   = 23;
 }
 
 message RegisterNodeRequest {
@@ -87,6 +88,14 @@ message ExpireNodeRequest {
 }
 
 message ExpireNodeResponse {
+    Node node = 1;
+}
+
+message ApproveNodeRequest {
+    uint64 node_id = 1;
+}
+
+message ApproveNodeResponse {
     Node node = 1;
 }
 

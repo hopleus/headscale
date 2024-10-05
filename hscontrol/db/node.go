@@ -261,6 +261,19 @@ func RenameNode(tx *gorm.DB,
 	return nil
 }
 
+func (hsdb *HSDatabase) NodeSetAuthorize(nodeID types.NodeID, authorize time.Time) error {
+	return hsdb.Write(func(tx *gorm.DB) error {
+		return NodeSetAuthorize(tx, nodeID, authorize)
+	})
+}
+
+// NodeSetAuthorize takes a Node struct and a new authorize time.
+func NodeSetAuthorize(tx *gorm.DB,
+	nodeID types.NodeID, authorize time.Time,
+) error {
+	return tx.Model(&types.Node{}).Where("id = ?", nodeID).Update("authorize", authorize).Error
+}
+
 func (hsdb *HSDatabase) NodeSetExpiry(nodeID types.NodeID, expiry time.Time) error {
 	return hsdb.Write(func(tx *gorm.DB) error {
 		return NodeSetExpiry(tx, nodeID, expiry)
