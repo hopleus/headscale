@@ -185,6 +185,7 @@ func (s *Suite) TestGetACLFilteredPeers(c *check.C) {
 	}
 
 	stor := make([]base, 0)
+	authorize := time.Date(2009, time.November, 10, 23, 9, 0, 0, time.UTC)
 
 	for _, name := range []string{"test", "admin"} {
 		user, err := db.CreateUser(name)
@@ -211,6 +212,7 @@ func (s *Suite) TestGetACLFilteredPeers(c *check.C) {
 			UserID:         stor[index%2].user.ID,
 			RegisterMethod: util.RegisterMethodAuthKey,
 			AuthKeyID:      ptr.To(stor[index%2].key.ID),
+			Authorize:      &authorize,
 		}
 		trx := db.DB.Save(&node)
 		c.Assert(trx.Error, check.IsNil)
