@@ -5,6 +5,7 @@ import (
 	"net/netip"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -19,6 +20,9 @@ func Test_NodeCanAccess(t *testing.T) {
 		ip := netip.MustParseAddr(ipStr)
 		return &ip
 	}
+
+	authorize := time.Date(2009, time.November, 10, 23, 9, 0, 0, time.UTC)
+
 	tests := []struct {
 		name  string
 		node1 Node
@@ -29,10 +33,12 @@ func Test_NodeCanAccess(t *testing.T) {
 		{
 			name: "no-rules",
 			node1: Node{
-				IPv4: iap("10.0.0.1"),
+				IPv4:      iap("10.0.0.1"),
+				Authorize: &authorize,
 			},
 			node2: Node{
-				IPv4: iap("10.0.0.2"),
+				IPv4:      iap("10.0.0.2"),
+				Authorize: &authorize,
 			},
 			rules: []tailcfg.FilterRule{},
 			want:  false,
@@ -40,10 +46,12 @@ func Test_NodeCanAccess(t *testing.T) {
 		{
 			name: "wildcard",
 			node1: Node{
-				IPv4: iap("10.0.0.1"),
+				IPv4:      iap("10.0.0.1"),
+				Authorize: &authorize,
 			},
 			node2: Node{
-				IPv4: iap("10.0.0.2"),
+				IPv4:      iap("10.0.0.2"),
+				Authorize: &authorize,
 			},
 			rules: []tailcfg.FilterRule{
 				{
@@ -61,10 +69,12 @@ func Test_NodeCanAccess(t *testing.T) {
 		{
 			name: "other-cant-access-src",
 			node1: Node{
-				IPv4: iap("100.64.0.1"),
+				IPv4:      iap("100.64.0.1"),
+				Authorize: &authorize,
 			},
 			node2: Node{
-				IPv4: iap("100.64.0.3"),
+				IPv4:      iap("100.64.0.3"),
+				Authorize: &authorize,
 			},
 			rules: []tailcfg.FilterRule{
 				{
@@ -79,10 +89,12 @@ func Test_NodeCanAccess(t *testing.T) {
 		{
 			name: "dest-cant-access-src",
 			node1: Node{
-				IPv4: iap("100.64.0.3"),
+				IPv4:      iap("100.64.0.3"),
+				Authorize: &authorize,
 			},
 			node2: Node{
-				IPv4: iap("100.64.0.2"),
+				IPv4:      iap("100.64.0.2"),
+				Authorize: &authorize,
 			},
 			rules: []tailcfg.FilterRule{
 				{
@@ -97,10 +109,12 @@ func Test_NodeCanAccess(t *testing.T) {
 		{
 			name: "src-can-access-dest",
 			node1: Node{
-				IPv4: iap("100.64.0.2"),
+				IPv4:      iap("100.64.0.2"),
+				Authorize: &authorize,
 			},
 			node2: Node{
-				IPv4: iap("100.64.0.3"),
+				IPv4:      iap("100.64.0.3"),
+				Authorize: &authorize,
 			},
 			rules: []tailcfg.FilterRule{
 				{
@@ -111,6 +125,30 @@ func Test_NodeCanAccess(t *testing.T) {
 				},
 			},
 			want: true,
+		},
+		{
+			name: "src-dont-can-access-dest",
+			node1: Node{
+				IPv4:      iap("100.64.0.2"),
+				Authorize: &authorize,
+			},
+			node2: Node{
+				IPv4: iap("100.64.0.3"),
+			},
+			rules: []tailcfg.FilterRule{},
+			want:  false,
+		},
+		{
+			name: "dest-dont-can-access-src",
+			node1: Node{
+				IPv4: iap("100.64.0.2"),
+			},
+			node2: Node{
+				IPv4:      iap("100.64.0.3"),
+				Authorize: &authorize,
+			},
+			rules: []tailcfg.FilterRule{},
+			want:  false,
 		},
 	}
 
