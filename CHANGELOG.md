@@ -20,7 +20,7 @@
 - Improved compatibilty of built-in DERP server with clients connecting over WebSocket.
 - Allow nodes to use SSH agent forwarding [#2145](https://github.com/juanfont/headscale/pull/2145)
 
-## [FORK] 0.23.0-1 (2024-10-04)
+## [FORK] 0.23.0-241005
 ### Changes
 
 - Modified Node response
