@@ -29,7 +29,7 @@ func (s *Suite) TestGetNode(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.getNode("test", "testnode")
@@ -58,7 +58,7 @@ func (s *Suite) TestGetNodeByID(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.GetNodeByID(0)
@@ -87,7 +87,7 @@ func (s *Suite) TestGetNodeByAnyNodeKey(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.GetNodeByID(0)
@@ -143,7 +143,7 @@ func (s *Suite) TestListPeers(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.GetNodeByID(0)
@@ -189,7 +189,7 @@ func (s *Suite) TestGetACLFilteredPeers(c *check.C) {
 	for _, name := range []string{"test", "admin"} {
 		user, err := db.CreateUser(name)
 		c.Assert(err, check.IsNil)
-		pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+		pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 		c.Assert(err, check.IsNil)
 		stor = append(stor, base{user, pak})
 	}
@@ -281,7 +281,7 @@ func (s *Suite) TestExpireNode(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.getNode("test", "testnode")
@@ -322,7 +322,7 @@ func (s *Suite) TestSetTags(c *check.C) {
 	user, err := db.CreateUser("test")
 	c.Assert(err, check.IsNil)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	c.Assert(err, check.IsNil)
 
 	_, err = db.getNode("test", "testnode")
@@ -558,7 +558,7 @@ func TestAutoApproveRoutes(t *testing.T) {
 			user, err := adb.CreateUser("test")
 			assert.NoError(t, err)
 
-			pak, err := adb.CreatePreAuthKey(user.Name, false, false, nil, nil)
+			pak, err := adb.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 			assert.NoError(t, err)
 
 			nodeKey := key.NewNode()
@@ -690,10 +690,10 @@ func TestListEphemeralNodes(t *testing.T) {
 	user, err := db.CreateUser("test")
 	assert.NoError(t, err)
 
-	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, nil)
+	pak, err := db.CreatePreAuthKey(user.Name, false, false, nil, true, nil)
 	assert.NoError(t, err)
 
-	pakEph, err := db.CreatePreAuthKey(user.Name, false, true, nil, nil)
+	pakEph, err := db.CreatePreAuthKey(user.Name, false, true, nil, true, nil)
 	assert.NoError(t, err)
 
 	node := types.Node{
