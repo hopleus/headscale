@@ -292,9 +292,10 @@ func (s *Scenario) CreatePreAuthKey(
 	user string,
 	reusable bool,
 	ephemeral bool,
+	preauthorized bool,
 ) (*v1.PreAuthKey, error) {
 	if headscale, err := s.Headscale(); err == nil {
-		key, err := headscale.CreateAuthKey(user, reusable, ephemeral)
+		key, err := headscale.CreateAuthKey(user, reusable, ephemeral, preauthorized)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create user: %w", err)
 		}
@@ -503,7 +504,7 @@ func (s *Scenario) CreateHeadscaleEnv(
 			return err
 		}
 
-		key, err := s.CreatePreAuthKey(userName, true, false)
+		key, err := s.CreatePreAuthKey(userName, true, false, true)
 		if err != nil {
 			return err
 		}

@@ -292,7 +292,7 @@ func LoadConfig(path string, isFile bool) error {
 	viper.SetDefault("tuning.node_mapsession_buffered_chan_size", 30)
 
 	viper.SetDefault("node_management.manual_approve_new_node", false)
-	viper.SetDefault("node_management.key_expiry", "180d")
+	viper.SetDefault("node_management.key_expiry", "0")
 
 	viper.SetDefault("prefixes.allocation", string(IPAllocationStrategySequential))
 

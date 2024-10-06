@@ -661,6 +661,7 @@ func (t *HeadscaleInContainer) CreateAuthKey(
 	user string,
 	reusable bool,
 	ephemeral bool,
+	preauthorized bool,
 ) (*v1.PreAuthKey, error) {
 	command := []string{
 		"headscale",
@@ -680,6 +681,10 @@ func (t *HeadscaleInContainer) CreateAuthKey(
 
 	if ephemeral {
 		command = append(command, "--ephemeral")
+	}
+
+	if preauthorized {
+		command = append(command, "--preauthorized")
 	}
 
 	result, _, err := dockertestutil.ExecuteCommand(
