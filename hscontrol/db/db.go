@@ -485,6 +485,45 @@ func NewHeadscaleDatabase(
 				},
 				Rollback: func(db *gorm.DB) error { return nil },
 			},
+			{
+				ID: "202410061105",
+				Migrate: func(tx *gorm.DB) error {
+					err = tx.AutoMigrate(&types.Node{})
+					if err != nil {
+						return err
+					}
+
+					if tx.Migrator().HasColumn(&types.Node{}, "authorize") {
+						nodes := types.Nodes{}
+						if err := tx.Find(&nodes).Error; err != nil {
+							log.Error().Err(err).Msg("Error accessing db")
+						}
+
+						now := time.Now().UTC()
+
+						for item, node := range nodes {
+							if node.Authorize == nil {
+								err = tx.Model(nodes[item]).Updates(types.Node{
+									Authorize: &now,
+								}).Error
+								if err != nil {
+									log.Error().
+										Caller().
+										Str("hostname", node.Hostname).
+										Time("authorize", *node.Authorize).
+										Err(err).
+										Msg("Failed to add authorisation time to existing nodes during database migration")
+								}
+							}
+						}
+
+						return nil
+					}
+
+					return fmt.Errorf("no node authorize column in DB")
+				},
+				Rollback: func(db *gorm.DB) error { return nil },
+			},
 		},
 	)
 
