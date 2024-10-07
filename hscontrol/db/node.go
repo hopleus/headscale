@@ -371,6 +371,11 @@ func (hsdb *HSDatabase) RegisterNodeFromAuthCallback(
 				node.Expiry = nodeExpiry
 			}
 
+			if registrationMethod == util.RegisterMethodCLI && node.Authorize == nil {
+				now := time.Now()
+				node.Authorize = &now
+			}
+
 			node, err := RegisterNode(
 				tx,
 				node,

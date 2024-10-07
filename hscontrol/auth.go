@@ -352,7 +352,7 @@ func (h *Headscale) handleAuthKey(
 		ctx := types.NotifyCtx(context.Background(), "handle-authkey", "na")
 		h.nodeNotifier.NotifyAll(ctx, types.StateUpdate{Type: types.StatePeerChanged, ChangeNodes: []types.NodeID{node.ID}})
 	} else {
-		now := time.Now().UTC()
+		now := time.Now()
 		var authorize *time.Time
 
 		if pak.Preauthorized {
