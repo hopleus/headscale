@@ -447,15 +447,20 @@ func (h *Headscale) createRouter(grpcMux *grpcRuntime.ServeMux) *mux.Router {
 	if provider, ok := h.authProvider.(*AuthProviderOIDC); ok {
 		router.HandleFunc("/oidc/callback", provider.OIDCCallbackHandler).Methods(http.MethodGet)
 	}
-	router.HandleFunc("/apple", h.AppleConfigMessage).Methods(http.MethodGet)
-	router.HandleFunc("/apple/{platform}", h.ApplePlatformConfig).
-		Methods(http.MethodGet)
-	router.HandleFunc("/windows", h.WindowsConfigMessage).Methods(http.MethodGet)
 
-	// TODO(kristoffer): move swagger into a package
-	router.HandleFunc("/swagger", headscale.SwaggerUI).Methods(http.MethodGet)
-	router.HandleFunc("/swagger/v1/openapiv2.json", headscale.SwaggerAPIv1).
-		Methods(http.MethodGet)
+	if h.cfg.Routes.PlatformConfig {
+		router.HandleFunc("/apple", h.AppleConfigMessage).Methods(http.MethodGet)
+		router.HandleFunc("/apple/{platform}", h.ApplePlatformConfig).
+			Methods(http.MethodGet)
+		router.HandleFunc("/windows", h.WindowsConfigMessage).Methods(http.MethodGet)
+	}
+
+	if h.cfg.Routes.Swagger {
+		// TODO(kristoffer): move swagger into a package
+		router.HandleFunc("/swagger", headscale.SwaggerUI).Methods(http.MethodGet)
+		router.HandleFunc("/swagger/v1/openapiv2.json", headscale.SwaggerAPIv1).
+			Methods(http.MethodGet)
+	}
 
 	if h.cfg.DERP.ServerEnabled {
 		router.HandleFunc("/derp", h.DERPServer.DERPHandler)

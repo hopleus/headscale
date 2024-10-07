@@ -385,6 +385,13 @@ logtail:
 # firewall devices. See https://tailscale.com/kb/1181/firewalls/ for more information.
 randomize_client_port: false
 
+# Configuration routes
+routes:
+  # Disabling routes to download configuration for windows and apple
+  platformConfig: false
+  # Disabling routes for Swagger
+  swagger: false
+
 ## NodeManagement
 node_management:
   # Require new nodes to be approved by admins before they can access the network.

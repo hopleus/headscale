@@ -1,3 +1,10 @@
+# Differences from the original HeadScale assembly
+
+- [x] Add HostInfo to Node response
+- [x] Added the ability to configure endpoints availability (Platform Configs and Swagger)
+
+# HeadScale
+
 ![headscale logo](./docs/logo/headscale3_header_stacked_left.png)
 
 ![ci](https://github.com/juanfont/headscale/actions/workflows/test.yml/badge.svg)

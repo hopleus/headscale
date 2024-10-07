@@ -1344,9 +1344,34 @@
         "online": {
           "type": "boolean"
         },
-        "authorized": {
-          "type": "string",
-          "format": "date-time"
+        "allowedExitNode": {
+          "type": "boolean"
+        },
+        "hasExitNode": {
+          "type": "boolean"
+        },
+        "hostInfo": {
+          "$ref": "#/definitions/v1NodeHostInfo"
+        }
+      }
+    },
+    "v1NodeHostInfo": {
+      "type": "object",
+      "properties": {
+        "tsVersion": {
+          "type": "string"
+        },
+        "osName": {
+          "type": "string"
+        },
+        "osVersion": {
+          "type": "string"
+        },
+        "deviceModel": {
+          "type": "string"
+        },
+        "deviceArch": {
+          "type": "string"
         }
       }
     },

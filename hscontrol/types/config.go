@@ -88,6 +88,8 @@ type Config struct {
 	Tuning Tuning
 
 	NodeManagement NodeManagement
+
+	Routes RoutesConfig
 }
 
 type DNSConfig struct {
@@ -205,6 +207,11 @@ type LogConfig struct {
 	Level  zerolog.Level
 }
 
+type RoutesConfig struct {
+	PlatformConfig bool
+	Swagger        bool
+}
+
 type Tuning struct {
 	NotifierSendTimeout            time.Duration
 	BatchChangeDelay               time.Duration
@@ -293,6 +300,9 @@ func LoadConfig(path string, isFile bool) error {
 
 	viper.SetDefault("node_management.manual_approve_new_node", false)
 	viper.SetDefault("node_management.key_expiry", "0")
+
+	viper.SetDefault("routes.platformConfig", true)
+	viper.SetDefault("routes.swagger", true)
 
 	viper.SetDefault("prefixes.allocation", string(IPAllocationStrategySequential))
 
@@ -956,7 +966,13 @@ func LoadServerConfig() (*Config, error) {
 			),
 		},
 
+
 		NodeManagement: nodeManagement,
+
+		Routes: RoutesConfig{
+			PlatformConfig: viper.GetBool("routes.platformConfig"),
+			Swagger:        viper.GetBool("routes.swagger"),
+		},
 	}, nil
 }
 

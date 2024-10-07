@@ -263,6 +263,28 @@ func (node *Node) Proto() *v1.Node {
 
 	if node.Authorize != nil {
 		nodeProto.Authorized = timestamppb.New(*node.Authorize)
+  }
+
+	if node.Routes != nil {
+		for _, route := range node.Routes {
+			if route.IsExitRoute() {
+				nodeProto.HasExitNode = route.Advertised
+				nodeProto.AllowedExitNode = route.IsAnnouncable()
+				break
+			}
+		}
+	}
+
+	if node.Hostinfo != nil {
+		hostInfo := &v1.NodeHostInfo{
+			TsVersion:   node.Hostinfo.IPNVersion,
+			OsName:      node.Hostinfo.OS,
+			OsVersion:   node.Hostinfo.OSVersion,
+			DeviceModel: node.Hostinfo.DeviceModel,
+			DeviceArch:  node.Hostinfo.Machine,
+		}
+
+		nodeProto.HostInfo = hostInfo
 	}
 
 	return nodeProto

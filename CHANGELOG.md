@@ -21,6 +21,19 @@
 - Allow nodes to use SSH agent forwarding [#2145](https://github.com/juanfont/headscale/pull/2145)
 - Node Approval. Manually approve new nodes before they access the network.
 
+## [FORK] 0.23.0-241005
+### Changes
+
+- Modified Node response
+  - allowedExitNode
+  - hasExitNode
+  - hostInfo
+    - tsVersion
+    - osName
+    - osVersion
+    - deviceModel
+    - deviceArch
+- Added the ability to configure endpoints availability (Platform Configs and Swagger)
 
 ## 0.23.0 (2024-09-18)
 
