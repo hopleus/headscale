@@ -19,6 +19,7 @@
 
 - Improved compatibilty of built-in DERP server with clients connecting over WebSocket.
 - Allow nodes to use SSH agent forwarding [#2145](https://github.com/juanfont/headscale/pull/2145)
+- Node Approval. Manually approve new nodes before they access the network.
 
 
 ## 0.23.0 (2024-09-18)
