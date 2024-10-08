@@ -48,6 +48,13 @@ func init() {
 	}
 	nodeCmd.AddCommand(registerNodeCmd)
 
+	approveNodeCmd.Flags().Uint64P("identifier", "i", 0, "Node identifier (ID)")
+	err = approveNodeCmd.MarkFlagRequired("identifier")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	nodeCmd.AddCommand(approveNodeCmd)
+
 	expireNodeCmd.Flags().Uint64P("identifier", "i", 0, "Node identifier (ID)")
 	err = expireNodeCmd.MarkFlagRequired("identifier")
 	if err != nil {
@@ -203,6 +210,43 @@ var listNodesCmd = &cobra.Command{
 				output,
 			)
 		}
+	},
+}
+
+var approveNodeCmd = &cobra.Command{
+	Use:     "approve",
+	Short:   "Approve a node in your network",
+	Aliases: []string{"a"},
+	Run: func(cmd *cobra.Command, args []string) {
+		output, _ := cmd.Flags().GetString("output")
+		identifier, err := cmd.Flags().GetUint64("identifier")
+		if err != nil {
+			ErrorOutput(
+				err,
+				fmt.Sprintf("Error converting ID to integer: %s", err),
+				output,
+			)
+			return
+		}
+		ctx, client, conn, cancel := newHeadscaleCLIWithConfig()
+		defer cancel()
+		defer conn.Close()
+		request := &v1.ApproveNodeRequest{
+			NodeId: identifier,
+		}
+		response, err := client.ApproveNode(ctx, request)
+		if err != nil {
+			ErrorOutput(
+				err,
+				fmt.Sprintf(
+					"Cannot expire node: %s\n",
+					status.Convert(err).Message(),
+				),
+				output,
+			)
+			return
+		}
+		SuccessOutput(response.GetNode(), "Node approved", output)
 	},
 }
 
@@ -529,6 +573,7 @@ func nodesToPtables(
 		"Ephemeral",
 		"Last seen",
 		"Expiration",
+		"Approved",
 		"Connected",
 		"Expired",
 	}
@@ -552,6 +597,13 @@ func nodesToPtables(
 		if node.GetLastSeen() != nil {
 			lastSeen = node.GetLastSeen().AsTime()
 			lastSeenTime = lastSeen.Format("2006-01-02 15:04:05")
+		}
+
+		var approved string
+		if node.Approved {
+			approved = pterm.LightGreen("yes")
+		} else {
+			approved = pterm.LightRed("no")
 		}
 
 		var expiry time.Time
@@ -642,6 +694,7 @@ func nodesToPtables(
 			strconv.FormatBool(ephemeral),
 			lastSeenTime,
 			expiryTime,
+			approved,
 			online,
 			expired,
 		}

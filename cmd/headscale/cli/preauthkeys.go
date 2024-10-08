@@ -38,6 +38,8 @@ func init() {
 		Bool("reusable", false, "Make the preauthkey reusable")
 	createPreAuthKeyCmd.PersistentFlags().
 		Bool("ephemeral", false, "Preauthkey for ephemeral nodes")
+	createPreAuthKeyCmd.PersistentFlags().
+		Bool("pre-approved", false, "Make the preauthkey with node pre-approval")
 	createPreAuthKeyCmd.Flags().
 		StringP("expiration", "e", DefaultPreAuthKeyExpiry, "Human-readable expiration of the key (e.g. 30m, 24h)")
 	createPreAuthKeyCmd.Flags().
@@ -91,6 +93,7 @@ var listPreAuthKeys = &cobra.Command{
 				"Key",
 				"Reusable",
 				"Ephemeral",
+				"Pre-Approved",
 				"Used",
 				"Expiration",
 				"Created",
@@ -116,6 +119,7 @@ var listPreAuthKeys = &cobra.Command{
 				key.GetKey(),
 				strconv.FormatBool(key.GetReusable()),
 				strconv.FormatBool(key.GetEphemeral()),
+				strconv.FormatBool(key.GetPreApproved()),
 				strconv.FormatBool(key.GetUsed()),
 				expiration,
 				key.GetCreatedAt().AsTime().Format("2006-01-02 15:04:05"),
@@ -148,13 +152,15 @@ var createPreAuthKeyCmd = &cobra.Command{
 
 		reusable, _ := cmd.Flags().GetBool("reusable")
 		ephemeral, _ := cmd.Flags().GetBool("ephemeral")
+		preApproved, _ := cmd.Flags().GetBool("pre-approved")
 		tags, _ := cmd.Flags().GetStringSlice("tags")
 
 		request := &v1.CreatePreAuthKeyRequest{
-			User:      user,
-			Reusable:  reusable,
-			Ephemeral: ephemeral,
-			AclTags:   tags,
+			User:        user,
+			Reusable:    reusable,
+			Ephemeral:   ephemeral,
+			PreApproved: preApproved,
+			AclTags:     tags,
 		}
 
 		durationStr, _ := cmd.Flags().GetString("expiration")

@@ -308,6 +308,10 @@ func (h *Headscale) handleAuthKey(
 			node.AuthKeyID = ptr.To(pak.ID)
 		}
 
+		if node.Approved == false {
+			node.Approved = pak.PreApproved
+		}
+
 		node.Expiry = &registerRequest.Expiry
 		node.User = pak.User
 		node.UserID = pak.UserID
@@ -350,6 +354,7 @@ func (h *Headscale) handleAuthKey(
 			MachineKey:     machineKey,
 			RegisterMethod: util.RegisterMethodAuthKey,
 			Expiry:         &registerRequest.Expiry,
+			Approved:       pak.PreApproved,
 			NodeKey:        nodeKey,
 			LastSeen:       &now,
 			ForcedTags:     pak.Proto().GetAclTags(),
@@ -399,7 +404,7 @@ func (h *Headscale) handleAuthKey(
 		return
 	}
 
-	resp.MachineAuthorized = true
+	resp.MachineAuthorized = node.IsApproved()
 	resp.User = *pak.User.TailscaleUser()
 	// Provide LoginName when registering with pre-auth key
 	// Otherwise it will need to exec `tailscale up` twice to fetch the *LoginName*
@@ -562,7 +567,7 @@ func (h *Headscale) handleNodeWithValidRegistration(
 		Msg("Client is registered and we have the current NodeKey. All clear to /map")
 
 	resp.AuthURL = ""
-	resp.MachineAuthorized = true
+	resp.MachineAuthorized = node.IsApproved()
 	resp.User = *node.User.TailscaleUser()
 	resp.Login = *node.User.TailscaleLogin()
 
