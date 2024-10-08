@@ -2,11 +2,12 @@ package templates
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/chasefleming/elem-go"
 	"github.com/chasefleming/elem-go/attrs"
 	"github.com/chasefleming/elem-go/styles"
 	"github.com/juanfont/headscale/hscontrol/types"
-	"strings"
 )
 
 type OIDCCallbackConfig struct {
@@ -26,6 +27,7 @@ var oidcBodyTagClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Var("-webkit-font-smoothing"):  "antialiased",
 	styles.Var("-moz-osx-font-smoothing"): "grayscale",
 })
+
 var oidcMainTagClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Display:       "flex",
 	styles.FlexDirection: "column",
@@ -36,6 +38,7 @@ var oidcMainTagClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.MinHeight:     "100%",
 	styles.Margin:        "0 auto",
 })
+
 var oidcContainerStyle = styles.Props{
 	styles.MarginLeft:   "auto",
 	styles.MarginRight:  "auto",
@@ -44,6 +47,7 @@ var oidcContainerStyle = styles.Props{
 	styles.MaxWidth:     "32rem",
 	styles.Width:        "100%",
 }
+
 var oidcHeaderBlockClass = oidcStyleMgr.AddStyle(
 	styles.Merge(
 		styles.Props{
@@ -56,6 +60,7 @@ var oidcHeaderBlockClass = oidcStyleMgr.AddStyle(
 		oidcContainerStyle,
 	),
 )
+
 var oidcHeaderUserBlockClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Display:    "flex",
 	styles.AlignItems: "center",
@@ -63,11 +68,13 @@ var oidcHeaderUserBlockClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Gap:        "0.5rem",
 	styles.MinWidth:   "0",
 })
+
 var oidcHeaderUserBlockTruncateClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Overflow:     "hidden",
 	styles.WhiteSpace:   "nowrap",
 	styles.TextOverflow: "ellipsis",
 })
+
 var oidcHeaderUserBlockPictureClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.FlexShrink:      "0",
 	styles.Width:           "1.5rem",
@@ -77,18 +84,23 @@ var oidcHeaderUserBlockPictureClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Border:          "1px #eeebea solid",
 	styles.BorderRadius:    "999px",
 })
-var oidcContainerClass = oidcStyleMgr.AddStyle(oidcContainerStyle)
-var oidcH1Class = oidcStyleMgr.AddStyle(styles.Props{
-	styles.FontSize:      "1.25rem",
-	styles.FontWeight:    "600",
-	styles.LetterSpacing: "-0.03em",
-})
+
+var (
+	oidcContainerClass = oidcStyleMgr.AddStyle(oidcContainerStyle)
+	oidcH1Class        = oidcStyleMgr.AddStyle(styles.Props{
+		styles.FontSize:      "1.25rem",
+		styles.FontWeight:    "600",
+		styles.LetterSpacing: "-0.03em",
+	})
+)
+
 var oidcHRClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Margin:          "2rem 0",
 	styles.Border:          "0",
 	styles.Height:          "1px",
 	styles.BackgroundColor: "#e8e8e8",
 })
+
 var oidcAClass = oidcStyleMgr.AddCompositeStyle(styles.CompositeStyle{
 	Default: styles.Props{
 		styles.Display:        "flex",
@@ -102,6 +114,7 @@ var oidcAClass = oidcStyleMgr.AddCompositeStyle(styles.CompositeStyle{
 		},
 	},
 })
+
 var oidcIconClass = oidcStyleMgr.AddStyle(styles.Props{
 	styles.Display:        "flex",
 	styles.AlignItems:     "center",

@@ -600,7 +600,7 @@ func nodesToPtables(
 		}
 
 		var approved string
-		if node.Approved {
+		if node.GetApproved() {
 			approved = pterm.LightGreen("yes")
 		} else {
 			approved = pterm.LightRed("no")

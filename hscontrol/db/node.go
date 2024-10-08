@@ -268,7 +268,7 @@ func (hsdb *HSDatabase) NodeSetApprove(nodeID types.NodeID, approved bool) error
 	})
 }
 
-// NodeSetApprove takes a Node struct and a set approval option
+// NodeSetApprove takes a Node struct and a set approval option.
 func NodeSetApprove(tx *gorm.DB,
 	nodeID types.NodeID, approved bool,
 ) error {

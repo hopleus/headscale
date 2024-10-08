@@ -21,7 +21,6 @@
 - Allow nodes to use SSH agent forwarding [#2145](https://github.com/juanfont/headscale/pull/2145)
 - Added manual approval of nodes in the network
 
-
 ## 0.23.0 (2024-09-18)
 
 This release was intended to be mainly a code reorganisation and refactoring, significantly improving the maintainability of the codebase. This should allow us to improve further and make it easier for the maintainers to keep on top of the project.

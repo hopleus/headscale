@@ -3,10 +3,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
-	"github.com/juanfont/headscale/integration/hsic"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
 	"net/http"
@@ -14,6 +10,11 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
+	"github.com/juanfont/headscale/integration/hsic"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 )
 
 type AuthApprovalScenario struct {
@@ -75,7 +76,7 @@ func TestAuthNodeApproval(t *testing.T) {
 
 	for _, node := range allNodes {
 		_, err = headscale.Execute([]string{
-			"headscale", "nodes", "approve", "--identifier", fmt.Sprintf("%d", node.Id),
+			"headscale", "nodes", "approve", "--identifier", fmt.Sprintf("%d", node.GetId()),
 		})
 		assertNoErr(t, err)
 	}
@@ -110,7 +111,7 @@ func TestAuthNodeApproval(t *testing.T) {
 	err = scenario.WaitForTailscaleSync()
 	assertNoErrSync(t, err)
 
-	//assertClientsState(t, allClients)
+	// assertClientsState(t, allClients)
 
 	allAddrs := lo.Map(allIps, func(x netip.Addr, index int) string {
 		return x.String()
