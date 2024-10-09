@@ -162,6 +162,7 @@ func NewHeadscale(cfg *types.Config) (*Headscale, error) {
 			ctx,
 			cfg.ServerURL,
 			&cfg.OIDC,
+			&cfg.NodeManagement,
 			app.db,
 			app.nodeNotifier,
 			app.ipAlloc,

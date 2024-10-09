@@ -173,7 +173,7 @@ func TestAuthKeyLogoutAndRelogin(t *testing.T) {
 			}
 
 			for userName := range spec {
-				key, err := scenario.CreatePreAuthKey(userName, true, false)
+				key, err := scenario.CreatePreAuthKey(userName, true, false, true)
 				if err != nil {
 					t.Fatalf("failed to create pre-auth key for user %s: %s", userName, err)
 				}
@@ -272,7 +272,7 @@ func testEphemeralWithOptions(t *testing.T, opts ...hsic.Option) {
 			t.Fatalf("failed to create tailscale nodes in user %s: %s", userName, err)
 		}
 
-		key, err := scenario.CreatePreAuthKey(userName, true, true)
+		key, err := scenario.CreatePreAuthKey(userName, true, true, true)
 		if err != nil {
 			t.Fatalf("failed to create pre-auth key for user %s: %s", userName, err)
 		}
@@ -362,7 +362,7 @@ func TestEphemeral2006DeletedTooQuickly(t *testing.T) {
 			t.Fatalf("failed to create tailscale nodes in user %s: %s", userName, err)
 		}
 
-		key, err := scenario.CreatePreAuthKey(userName, true, true)
+		key, err := scenario.CreatePreAuthKey(userName, true, true, true)
 		if err != nil {
 			t.Fatalf("failed to create pre-auth key for user %s: %s", userName, err)
 		}
@@ -1036,8 +1036,8 @@ func Test2118DeletingOnlineNodePanics(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.Len(t, nodeList, 2)
-	assert.True(t, nodeList[0].Online)
-	assert.True(t, nodeList[1].Online)
+	assert.True(t, nodeList[0].GetOnline())
+	assert.True(t, nodeList[1].GetOnline())
 
 	// Delete the first node, which is online
 	_, err = headscale.Execute(
@@ -1047,7 +1047,7 @@ func Test2118DeletingOnlineNodePanics(t *testing.T) {
 			"delete",
 			"--identifier",
 			// Delete the last added machine
-			fmt.Sprintf("%d", nodeList[0].Id),
+			fmt.Sprintf("%d", nodeList[0].GetId()),
 			"--output",
 			"json",
 			"--force",
@@ -1072,7 +1072,6 @@ func Test2118DeletingOnlineNodePanics(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.Len(t, nodeListAfter, 1)
-	assert.True(t, nodeListAfter[0].Online)
-	assert.Equal(t, nodeList[1].Id, nodeListAfter[0].Id)
-
+	assert.True(t, nodeListAfter[0].GetOnline())
+	assert.Equal(t, nodeList[1].GetId(), nodeListAfter[0].GetId())
 }

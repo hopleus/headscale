@@ -135,6 +135,7 @@ func (api headscaleV1APIServer) CreatePreAuthKey(
 		request.GetUser(),
 		request.GetReusable(),
 		request.GetEphemeral(),
+		request.GetPreApproved(),
 		&expiration,
 		request.AclTags,
 	)
@@ -210,10 +211,13 @@ func (api headscaleV1APIServer) RegisterNode(
 		return nil, fmt.Errorf("looking up user: %w", err)
 	}
 
+	manualApprovedNode := api.h.cfg.NodeManagement.ManualApproveNewNode
+
 	node, err := api.h.db.RegisterNodeFromAuthCallback(
 		mkey,
 		types.UserID(user.ID),
 		nil,
+		manualApprovedNode,
 		util.RegisterMethodCLI,
 		ipv4, ipv6,
 	)
@@ -326,6 +330,52 @@ func (api headscaleV1APIServer) DeleteNode(
 	}
 
 	return &v1.DeleteNodeResponse{}, nil
+}
+
+func (api headscaleV1APIServer) ApproveNode(
+	ctx context.Context,
+	request *v1.ApproveNodeRequest,
+) (*v1.ApproveNodeResponse, error) {
+	node, err := db.Write(api.h.db.DB, func(tx *gorm.DB) (*types.Node, error) {
+		db.NodeSetApprove(
+			tx,
+			types.NodeID(request.GetNodeId()),
+			true,
+		)
+
+		return db.GetNodeByID(tx, types.NodeID(request.GetNodeId()))
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = types.NotifyCtx(ctx, "cli-authorizenode-self", node.Hostname)
+	api.h.nodeNotifier.NotifyByNodeID(
+		ctx,
+		types.StateUpdate{
+			Type:        types.StateSelfUpdate,
+			ChangeNodes: []types.NodeID{node.ID},
+		},
+		node.ID)
+
+	ctx = types.NotifyCtx(ctx, "cli-authorizenode-peers", node.Hostname)
+	api.h.nodeNotifier.NotifyWithIgnore(
+		ctx,
+		types.StateUpdate{
+			Type: types.StatePeerChangedPatch,
+			ChangePatches: []*tailcfg.PeerChange{
+				{
+					NodeID: node.ID.NodeID(),
+				},
+			},
+		},
+		node.ID)
+
+	log.Trace().
+		Str("node", node.Hostname).
+		Msg("node approved")
+
+	return &v1.ApproveNodeResponse{Node: node.Proto()}, nil
 }
 
 func (api headscaleV1APIServer) ExpireNode(

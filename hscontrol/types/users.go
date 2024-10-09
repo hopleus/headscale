@@ -61,7 +61,7 @@ func (u *User) DisplayNameOrUsername() string {
 }
 
 // TODO(kradalby): See if we can fill in Gravatar here.
-func (u *User) profilePicURL() string {
+func (u *User) GetProfilePicURL() string {
 	return u.ProfilePicURL
 }
 
@@ -70,7 +70,7 @@ func (u *User) TailscaleUser() *tailcfg.User {
 		ID:            tailcfg.UserID(u.ID),
 		LoginName:     u.Username(),
 		DisplayName:   u.DisplayNameOrUsername(),
-		ProfilePicURL: u.profilePicURL(),
+		ProfilePicURL: u.GetProfilePicURL(),
 		Logins:        []tailcfg.LoginID{},
 		Created:       u.CreatedAt,
 	}
@@ -85,7 +85,7 @@ func (u *User) TailscaleLogin() *tailcfg.Login {
 		Provider:      u.Provider,
 		LoginName:     u.Username(),
 		DisplayName:   u.DisplayNameOrUsername(),
-		ProfilePicURL: u.profilePicURL(),
+		ProfilePicURL: u.GetProfilePicURL(),
 	}
 
 	return &login
@@ -96,7 +96,7 @@ func (u *User) TailscaleUserProfile() tailcfg.UserProfile {
 		ID:            tailcfg.UserID(u.ID),
 		LoginName:     u.Username(),
 		DisplayName:   u.DisplayNameOrUsername(),
-		ProfilePicURL: u.profilePicURL(),
+		ProfilePicURL: u.GetProfilePicURL(),
 	}
 }
 

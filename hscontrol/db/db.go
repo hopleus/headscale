@@ -485,6 +485,48 @@ func NewHeadscaleDatabase(
 				},
 				Rollback: func(db *gorm.DB) error { return nil },
 			},
+			{
+				ID: "202410071005",
+				Migrate: func(tx *gorm.DB) error {
+					err = tx.AutoMigrate(&types.PreAuthKey{})
+					if err != nil {
+						return err
+					}
+
+					err = tx.AutoMigrate(&types.Node{})
+					if err != nil {
+						return err
+					}
+
+					if tx.Migrator().HasColumn(&types.Node{}, "approved") {
+						nodes := types.Nodes{}
+						if err := tx.Find(&nodes).Error; err != nil {
+							log.Error().Err(err).Msg("Error accessing db")
+						}
+
+						for item, node := range nodes {
+							if node.IsApproved() == false {
+								err = tx.Model(nodes[item]).Updates(types.Node{
+									Approved: true,
+								}).Error
+								if err != nil {
+									log.Error().
+										Caller().
+										Str("hostname", node.Hostname).
+										Bool("approved", node.IsApproved()).
+										Err(err).
+										Msg("Failed to add approval option to existing nodes during database migration")
+								}
+							}
+						}
+
+						return nil
+					}
+
+					return fmt.Errorf("no node approved column in DB")
+				},
+				Rollback: func(db *gorm.DB) error { return nil },
+			},
 		},
 	)
 

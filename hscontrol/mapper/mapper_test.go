@@ -191,6 +191,7 @@ func Test_fullMapResponse(t *testing.T) {
 		AuthKey:    &types.PreAuthKey{},
 		LastSeen:   &lastSeen,
 		Expiry:     &expire,
+		Approved:   true,
 		Hostinfo:   &tailcfg.Hostinfo{},
 		Routes: []types.Route{
 			{
@@ -270,6 +271,7 @@ func Test_fullMapResponse(t *testing.T) {
 		ForcedTags: []string{},
 		LastSeen:   &lastSeen,
 		Expiry:     &expire,
+		Approved:   true,
 		Hostinfo:   &tailcfg.Hostinfo{},
 		Routes:     []types.Route{},
 		CreatedAt:  created,

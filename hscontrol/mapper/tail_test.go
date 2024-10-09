@@ -59,6 +59,7 @@ func TestTailNode(t *testing.T) {
 			node: &types.Node{
 				GivenName: "empty",
 				Hostinfo:  &tailcfg.Hostinfo{},
+				Approved:  true,
 			},
 			pol:        &policy.ACLPolicy{},
 			dnsConfig:  &tailcfg.DNSConfig{},
@@ -73,6 +74,34 @@ func TestTailNode(t *testing.T) {
 				Tags:              []string{},
 				PrimaryRoutes:     []netip.Prefix{},
 				MachineAuthorized: true,
+
+				CapMap: tailcfg.NodeCapMap{
+					tailcfg.CapabilityFileSharing: []tailcfg.RawMessage{},
+					tailcfg.CapabilityAdmin:       []tailcfg.RawMessage{},
+					tailcfg.CapabilitySSH:         []tailcfg.RawMessage{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty-node",
+			node: &types.Node{
+				GivenName: "empty",
+				Hostinfo:  &tailcfg.Hostinfo{},
+			},
+			pol:        &policy.ACLPolicy{},
+			dnsConfig:  &tailcfg.DNSConfig{},
+			baseDomain: "",
+			want: &tailcfg.Node{
+				Name:              "empty",
+				StableID:          "0",
+				Addresses:         []netip.Prefix{},
+				AllowedIPs:        []netip.Prefix{},
+				DERP:              "127.3.3.40:0",
+				Hostinfo:          hiview(tailcfg.Hostinfo{}),
+				Tags:              []string{},
+				PrimaryRoutes:     []netip.Prefix{},
+				MachineAuthorized: false,
 
 				CapMap: tailcfg.NodeCapMap{
 					tailcfg.CapabilityFileSharing: []tailcfg.RawMessage{},
@@ -106,6 +135,7 @@ func TestTailNode(t *testing.T) {
 				AuthKey:    &types.PreAuthKey{},
 				LastSeen:   &lastSeen,
 				Expiry:     &expire,
+				Approved:   true,
 				Hostinfo:   &tailcfg.Hostinfo{},
 				Routes: []types.Route{
 					{

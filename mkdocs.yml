@@ -136,6 +136,7 @@ nav:
           - OpenBSD: running-headscale-openbsd.md
           - Container: running-headscale-container.md
       - Configuration:
+          - Node management: node-management.md
           - Web UI: web-ui.md
           - OIDC authentication: oidc.md
           - Exit node: exit-node.md
