@@ -2,7 +2,12 @@ package integration
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
+	"github.com/juanfont/headscale/integration/hsic"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
 	"net/http"
@@ -10,11 +15,6 @@ import (
 	"net/url"
 	"strings"
 	"testing"
-
-	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
-	"github.com/juanfont/headscale/integration/hsic"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 )
 
 type AuthApprovalScenario struct {
@@ -40,6 +40,9 @@ func TestAuthNodeApproval(t *testing.T) {
 	err = scenario.CreateHeadscaleEnv(
 		spec,
 		hsic.WithTestName("approval"),
+		hsic.WithEmbeddedDERPServerOnly(),
+		hsic.WithTLS(),
+		hsic.WithHostnameAsServerURL(),
 		hsic.WithManualApproveNewNode(),
 	)
 	assertNoErrHeadscaleEnv(t, err)
@@ -237,7 +240,16 @@ func (s *AuthApprovalScenario) runHeadscaleRegister(userStr string, loginURL *ur
 	loginURL.Host = fmt.Sprintf("%s:8080", headscale.GetIP())
 	loginURL.Scheme = "http"
 
-	httpClient := &http.Client{}
+	if len(headscale.GetCert()) > 0 {
+		loginURL.Scheme = "https"
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{
+		Transport: tr,
+	}
 	ctx := context.Background()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, loginURL.String(), nil)
 	resp, err := httpClient.Do(req)
