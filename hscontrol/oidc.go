@@ -1,14 +1,12 @@
 package hscontrol
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	_ "embed"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"slices"
 	"strings"
@@ -18,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/juanfont/headscale/hscontrol/db"
 	"github.com/juanfont/headscale/hscontrol/notifier"
+	"github.com/juanfont/headscale/hscontrol/templates"
 	"github.com/juanfont/headscale/hscontrol/policy"
 	"github.com/juanfont/headscale/hscontrol/types"
 	"github.com/juanfont/headscale/hscontrol/util"
@@ -121,7 +120,7 @@ func (a *AuthProviderOIDC) determineNodeExpiry(idTokenExpiration time.Time) time
 	return time.Now().Add(a.cfg.Expiry)
 }
 
-// RegisterOIDC redirects to the OIDC provider for authentication
+// RegisterHandler redirects to the OIDC provider for authentication
 // Puts NodeKey in cache so the callback can retrieve it using the oidc state param
 // Listens in /register/:mKey.
 func (a *AuthProviderOIDC) RegisterHandler(
@@ -175,18 +174,6 @@ func (a *AuthProviderOIDC) RegisterHandler(
 
 	http.Redirect(writer, req, authURL, http.StatusFound)
 }
-
-type oidcCallbackTemplateConfig struct {
-	User string
-	Verb string
-}
-
-//go:embed assets/oidc_callback_template.html
-var oidcCallbackTemplateContent string
-
-var oidcCallbackTemplate = template.Must(
-	template.New("oidccallback").Parse(oidcCallbackTemplateContent),
-)
 
 // OIDCCallbackHandler handles the callback from the OIDC endpoint
 // Retrieves the nkey from the state cache and adds the node to the users email user
@@ -252,19 +239,11 @@ func (a *AuthProviderOIDC) OIDCCallbackHandler(
 			return
 		}
 
-		// TODO(kradalby): replace with go-elem
-		var content bytes.Buffer
-		if err := oidcCallbackTemplate.Execute(&content, oidcCallbackTemplateConfig{
-			User: user.DisplayNameOrUsername(),
-			Verb: "Reauthenticated",
-		}); err != nil {
-			http.Error(writer, fmt.Errorf("rendering OIDC callback template: %w", err).Error(), http.StatusInternalServerError)
-			return
-		}
+		content := templates.OidcCallback(node, user, "Reauthenticated")
 
 		writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 		writer.WriteHeader(http.StatusOK)
-		_, err = writer.Write(content.Bytes())
+		_, err = writer.Write([]byte(content))
 		if err != nil {
 			util.LogErr(err, "Failed to write response")
 		}
@@ -274,20 +253,17 @@ func (a *AuthProviderOIDC) OIDCCallbackHandler(
 
 	// Register the node if it does not exist.
 	if mKey != nil {
-		if err := a.registerNode(user, mKey, nodeExpiry); err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		content, err := renderOIDCCallbackTemplate(user)
+		node, err = a.registerNode(user, mKey, nodeExpiry)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		content := templates.OidcCallback(node, user, "Authenticated")
+
 		writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 		writer.WriteHeader(http.StatusOK)
-		if _, err := writer.Write(content.Bytes()); err != nil {
+		if _, err := writer.Write([]byte(content)); err != nil {
 			util.LogErr(err, "Failed to write response")
 		}
 
@@ -494,44 +470,29 @@ func (a *AuthProviderOIDC) registerNode(
 	user *types.User,
 	machineKey *key.MachinePublic,
 	expiry time.Time,
-) error {
+) (*types.Node, error) {
 	ipv4, ipv6, err := a.ipAlloc.Next()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if _, err := a.db.RegisterNodeFromAuthCallback(
+	node, err := a.db.RegisterNodeFromAuthCallback(
 		*machineKey,
 		types.UserID(user.ID),
 		&expiry,
 		util.RegisterMethodOIDC,
 		ipv4, ipv6,
-	); err != nil {
-		return fmt.Errorf("could not register node: %w", err)
+	)
+	if err != nil {
+		return nil, fmt.Errorf("could not register node: %w", err)
 	}
 
 	err = nodesChangedHook(a.db, a.polMan, a.notifier)
 	if err != nil {
-		return fmt.Errorf("updating resources using node: %w", err)
+		return nil, fmt.Errorf("updating resources using node: %w", err)
 	}
 
-	return nil
-}
-
-// TODO(kradalby):
-// Rewrite in elem-go.
-func renderOIDCCallbackTemplate(
-	user *types.User,
-) (*bytes.Buffer, error) {
-	var content bytes.Buffer
-	if err := oidcCallbackTemplate.Execute(&content, oidcCallbackTemplateConfig{
-		User: user.DisplayNameOrUsername(),
-		Verb: "Authenticated",
-	}); err != nil {
-		return nil, fmt.Errorf("rendering OIDC callback template: %w", err)
-	}
-
-	return &content, nil
+	return node, nil
 }
 
 // TODO(kradalby): Reintroduce when strip_email_domain is removed

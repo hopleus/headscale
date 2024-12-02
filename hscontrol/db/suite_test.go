@@ -66,6 +66,7 @@ func newSQLiteTestDB() (*HSDatabase, error) {
 			},
 		},
 		"",
+		types.NodeManagement{},
 		emptyCache(),
 	)
 	if err != nil {
@@ -116,6 +117,7 @@ func newPostgresTestDB(t *testing.T) *HSDatabase {
 			},
 		},
 		"",
+		types.NodeManagement{},
 		emptyCache(),
 	)
 	if err != nil {

@@ -19,6 +19,7 @@ jobs:
           - TestACLNamedHostsCanReach
           - TestACLDevice1CanAccessDevice2
           - TestPolicyUpdateWhileRunningWithCLIInDatabase
+          - TestAuthNodeApproval
           - TestOIDCAuthenticationPingAll
           - TestOIDCExpireNodesBasedOnTokenExpiry
           - TestOIDC024UserCreation
@@ -28,11 +29,13 @@ jobs:
           - TestPreAuthKeyCommand
           - TestPreAuthKeyCommandWithoutExpiry
           - TestPreAuthKeyCommandReusableEphemeral
+          - TestPreAuthKeyCommandPreApproved
           - TestPreAuthKeyCorrectUserLoggedInCommand
           - TestApiKeyCommand
           - TestNodeTagCommand
           - TestNodeAdvertiseTagCommand
           - TestNodeCommand
+          - TestNodeApproveCommand
           - TestNodeExpireCommand
           - TestNodeRenameCommand
           - TestNodeMoveCommand

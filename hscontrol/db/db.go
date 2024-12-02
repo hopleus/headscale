@@ -29,7 +29,10 @@ func init() {
 	schema.RegisterSerializer("text", TextSerialiser{})
 }
 
-var errDatabaseNotSupported = errors.New("database type not supported")
+var (
+	errDatabaseNotSupported           = errors.New("database type not supported")
+	errNoNodeApprovedColumnInDatabase = errors.New("no node approved column in database")
+)
 
 // KV is a key-value store in a psql table. For future use...
 // TODO(kradalby): Is this used for anything?
@@ -43,7 +46,8 @@ type HSDatabase struct {
 	cfg      *types.DatabaseConfig
 	regCache *zcache.Cache[string, types.Node]
 
-	baseDomain string
+	baseDomain     string
+	nodeManagement *types.NodeManagement
 }
 
 // TODO(kradalby): assemble this struct from toptions or something typed
@@ -51,6 +55,7 @@ type HSDatabase struct {
 func NewHeadscaleDatabase(
 	cfg types.DatabaseConfig,
 	baseDomain string,
+	nodeManagement types.NodeManagement,
 	regCache *zcache.Cache[string, types.Node],
 ) (*HSDatabase, error) {
 	dbConn, err := openDB(cfg)
@@ -521,6 +526,48 @@ func NewHeadscaleDatabase(
 				},
 				Rollback: func(db *gorm.DB) error { return nil },
 			},
+			{
+				ID: "202410071005",
+				Migrate: func(db *gorm.DB) error {
+					err = db.AutoMigrate(&types.PreAuthKey{})
+					if err != nil {
+						return err
+					}
+
+					err = db.AutoMigrate(&types.Node{})
+					if err != nil {
+						return err
+					}
+
+					if db.Migrator().HasColumn(&types.Node{}, "approved") {
+						nodes := types.Nodes{}
+						if err := db.Find(&nodes).Error; err != nil {
+							log.Error().Err(err).Msg("Error accessing db")
+						}
+
+						for item, node := range nodes {
+							if !node.IsApproved() {
+								err = db.Model(nodes[item]).Updates(types.Node{
+									Approved: true,
+								}).Error
+								if err != nil {
+									log.Error().
+										Caller().
+										Str("hostname", node.Hostname).
+										Bool("approved", node.IsApproved()).
+										Err(err).
+										Msg("Failed to add approval option to existing nodes during database migration")
+								}
+							}
+						}
+
+						return nil
+					}
+
+					return errNoNodeApprovedColumnInDatabase
+				},
+				Rollback: func(db *gorm.DB) error { return nil },
+			},
 		},
 	)
 
@@ -533,7 +580,8 @@ func NewHeadscaleDatabase(
 		cfg:      &cfg,
 		regCache: regCache,
 
-		baseDomain: baseDomain,
+		baseDomain:     baseDomain,
+		nodeManagement: &nodeManagement,
 	}
 
 	return &db, err
